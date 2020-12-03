@@ -25,6 +25,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -40,7 +41,7 @@
       <option name="presentableId" value="Default" />
       <updated>1606942115981</updated>
       <workItem from="1606942117134" duration="16468000" />
-      <workItem from="1606998795135" duration="8901000" />
+      <workItem from="1606998795135" duration="15971000" />
     </task>
     <servers />
   </component>

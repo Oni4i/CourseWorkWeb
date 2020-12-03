@@ -154,7 +154,7 @@ function insertRatesMain() {
                 let select = $('#exampleFormControlSelect1');
                 select.children().remove();
                 for (let i = 0; i < result.rows.length; i++) {
-                    select.append(`<option data-id='${result.rows[i]['id']}' data-price='${result.rows[i]['price']}'>${result.rows[i]['name']}</option>`)
+                    select.append(`<option data-id='${result.rows[i]['id']}' value='${result.rows[i]['price']}'>${result.rows[i]['name']}</option>`)
                 }
             },
             function (tx, error) {
@@ -173,7 +173,7 @@ function insertAdditionalsMain() {
                 let ul = $('#additionals');
                 ul.children().remove();
                 for (let i = 0; i < result.rows.length; i++) {
-                    ul.append(`<li><label><input data-id='${result.rows[i]['id']}' data-price='${result.rows[i]['price']}' type="checkbox" onclick="selectAdditional(this)">${result.rows[i]['name']}</label></li>`);
+                    ul.append(`<li><label><input data-id='${result.rows[i]['id']}' data-price='${result.rows[i]['price']}' type="checkbox" >${result.rows[i]['name']}</label></li>`);
                 }
             },
             function (tx, error) {
@@ -228,6 +228,7 @@ function insertProfile() {
 
 
 function orderTaxi() {
+
     let from = $('#validationServer01').val();
     let to = $('#validationServer02').val();
     let phone = $('#validationServer03').val();
@@ -241,7 +242,71 @@ function orderTaxi() {
     }));
 
     let currentDate = new Date();
-    time = new Date(currentDate.getUTCFullYear() + '-' + (currentDate.getMonth() + 1) + '-' + (currentDate.getDay() - 1) + ' ' + time +':01')
+    time = new Date(currentDate.getUTCFullYear() + '-' + (currentDate.getMonth() + 1) + '-' + (currentDate.getDate()) + ' ' + time +':01')
+    time = time.valueOf() / 1000
+
+    ymaps.ready(function () {
+        var myMap = new ymaps.Map('map', {
+            center: [55.75, 37.57],
+            zoom: 9,
+            controls: ['routePanelControl']
+        });
+
+        // Получение ссылки на панель.
+        var control = myMap.controls.get('routePanelControl');
+        control.routePanel.options.set({
+            types: {auto: true}
+        });
+        control.routePanel.state.set({
+            from: from,
+            to: to
+        });
+
+        control.routePanel.getRouteAsync().then(function (route) {
+
+            // Повесим обработчик на событие построения маршрута.
+            route.model.events.add('requestsuccess', function () {
+
+                let activeRoute = route.getActiveRoute();
+                if (activeRoute) {
+                    // Получим протяженность маршрута.
+                    let length = route.getActiveRoute().properties.get("distance")
+                    let distance = length['value'] / 1000;
+
+                    let sum = 0;
+                    sum += Math.ceil(distance * rate );
+                    sum += Object.keys(additional).reduce(function (sum, key) {
+                        return +additional[key]['price'] + sum;
+                    }, 0)
+                    console.log(sum);
+
+                    let modal = $('#exampleModal');
+                    let modalBody = modal.find('.modal-body');
+                    let confirm = modal.find('#confirmed');
+
+                    modalBody.text('Сумма к оплате: ' + sum + '₽');
+                    confirm.click(function () {
+                       saveOrder(from, to, phone, rate, time, sum);
+                       alert('Заказ создан!');
+                       modal.modal('hide');
+                    });
+                    modal.modal('show')
+                }
+            });
+        });
+    });
+}
+
+function saveOrder(from, to, phone, rate, time, price) {
+
+    db.transaction( function (tx) {
+        tx.executeSql(
+            "INSERT INTO `ORDERS` (`from`, `to`, `time`, `rate`, `price`, `phone`, `user_id`) " +
+            "           VALUES (?, ?, ?, ?, ?, ?, ?)"
+            , [
+                from, to, time, rate, price, phone, localStorage.getItem('user')
+            ]);
+    })
 }
 
 function auth() {
@@ -269,13 +334,16 @@ function isUserAuth() {
 }
 
 function redirect() {
+    let splitedPathName = document.location.pathname.split('/');
+    let currentFile = splitedPathName[splitedPathName.length-1].split('?')[0]
+
     if (isUserAuth()) {
-        if (['auth.html', 'register.html'].indexOf(document.location.pathname.split('/')[1]) !== -1) {
-            document.location.pathname = '/cabinet.html';
+        if (['auth.html', 'register.html'].indexOf(currentFile) !== -1) {
+            document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/cabinet.html';
         }
     } else {
-        if (['auth.html', 'register.html'].indexOf(document.location.pathname.split('/')[1]) === -1) {
-            document.location.pathname = '/auth.html';
+        if (['auth.html', 'register.html'].indexOf(currentFile) === -1) {
+            document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/auth.html';
         }
     }
 }
