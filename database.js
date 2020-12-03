@@ -21,6 +21,15 @@ db.transaction(function (tx) {
             "  `login` VARCHAR(200) NOT NULL,\n" +
             "  `password` VARCHAR(200) NOT NULL\n )"
         );
+        //Таблица PARTNERS - хранит данные о партнёрах
+        tx.executeSql(
+            "CREATE TABLE IF NOT EXISTS `PARTNERS` (\n" +
+            "  `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,\n" +
+            "  `name` VARCHAR(200) NOT NULL,\n" +
+            "  `email` VARCHAR(200) NOT NULL,\n" +
+            "  `phone` VARCHAR(15) NOT NULL,\n" +
+            "  `site` VARCHAR(255) NOT NULL\n )"
+        );
         //Таблица ORDERS - хранит данные о заказах
         tx.executeSql(
             "CREATE TABLE IF NOT EXISTS `ORDERS` (\n" +
@@ -233,6 +242,7 @@ function orderTaxi() {
     let to = $('#validationServer02').val();
     let phone = $('#validationServer03').val();
     let rate = $('#exampleFormControlSelect1').val();
+    let rateId = $('#exampleFormControlSelect1 option:selected').attr('data-id')
     let time = $('#validationServer04').val();
     let additional = jQuery.makeArray($('#additionals li label input:checked').map((index, element) => {
         return {
@@ -286,7 +296,7 @@ function orderTaxi() {
 
                     modalBody.text('Сумма к оплате: ' + sum + '₽');
                     confirm.click(function () {
-                       saveOrder(from, to, phone, rate, time, sum);
+                       saveOrder(from, to, phone, rateId, time, sum, additional);
                        alert('Заказ создан!');
                        modal.modal('hide');
                     });
@@ -297,8 +307,7 @@ function orderTaxi() {
     });
 }
 
-function saveOrder(from, to, phone, rate, time, price) {
-
+function saveOrder(from, to, phone, rate, time, price, additional) {
     db.transaction( function (tx) {
         tx.executeSql(
             "INSERT INTO `ORDERS` (`from`, `to`, `time`, `rate`, `price`, `phone`, `user_id`) " +
@@ -306,7 +315,31 @@ function saveOrder(from, to, phone, rate, time, price) {
             , [
                 from, to, time, rate, price, phone, localStorage.getItem('user')
             ]);
+
+        tx.executeSql(
+            "SELECT max(id) as `order` from `ORDERS` WHERE user_id = ?",
+            [localStorage.getItem('user')],
+            function (tx, result) {
+                let order = result.rows.item(0)['order'];
+
+                let params = Object.keys(additional).reduce(function (arr, key) {
+                    arr.push(order);
+                    arr.push(additional[key]['id']);
+                    return arr;
+                }, [])
+
+                let valuesQuery = params.reduce((str, val, index) => {
+                    if (index === params.length - 1) return str + ' ?)';
+                    if (index % 2 === 0) return str + '(?,';
+                    else return str + ' ?), ';
+                }, '')
+
+                tx.executeSql("INSERT INTO `ADDITIONAL_ORDERS` (`order_id`, `additional_id`) VALUES " + valuesQuery, params);
+
+            }
+        )
     })
+
 }
 
 function auth() {
@@ -369,7 +402,9 @@ function register() {
                         function (tx, result) {
                             if (result.rowsAffected === 1) {
                                 alert('Аккаунт успешно создан!');
-                                document.location.pathname = '/auth.html';
+                                let splitedPathName = document.location.pathname.split('/');
+                                let currentFile = splitedPathName[splitedPathName.length-1].split('?')[0]
+                                document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/auth.html';
                             } else {
                                 alert('Не удалось создать аккаунт');
                             }
@@ -379,5 +414,50 @@ function register() {
             function (tx, error) {
                 console.log(error);
             });
+    })
+}
+
+function insertHistoryCabinet() {
+    let modal = $('#exampleModalCenter');
+
+    db.transaction(function(tx) {
+        tx.executeSql(
+            'SELECT `ORDERS`.*, `RATES`.name FROM `ORDERS` LEFT JOIN `RATES` ON `RATES`.id = `ORDERS`.rate WHERE user_id = ? ORDER BY `ORDERS`.id DESC',
+            [localStorage.getItem('user')],
+            function (tx, result) {
+                if (result.rows.length === 0) return;
+                let tableBody = modal.find('.modal-body tbody');
+                tableBody.children().remove();
+                console.log(result.rows)
+                for (let i = 0; i < result.rows.length; i++) {
+                    tableBody.append(`
+                                <tr>
+                                    <th>${new Date(result.rows.item(i)['time'] * 1000)}</th>
+                                    <td>${result.rows.item(i)['from']}</td>
+                                    <td>${result.rows.item(i)['to']}</td>
+                                    <td>${result.rows.item(i)['price']}₽</td>
+                                    <td>${result.rows.item(i)['name']}</td>
+                                </tr>
+                    `)
+                }
+            }
+        )
+    })
+}
+
+function savePartners() {
+    let name = $('#validationServer02').val();
+    let email = $('#validationServer03').val();
+    let phone = $('#validationServer04').val();
+    let site = $('#validationServer05').val();
+
+    db.transaction(function(tx) {
+        tx.executeSql(
+            'INSERT INTO `PARTNERS` (`name`, `email`, `phone`, `site`) VALUES (?, ?, ?, ?)',
+            [name, email, phone, site],
+            function (tx, result) {
+                alert('Заявка принята!');
+            }
+        )
     })
 }
