@@ -1,4 +1,4 @@
-
+//Редирект страницы, нужен для авторизации
 redirect();
 let db = openDatabase('StudentShipilovIE6618', '0.1', 'StudentShipilovIE6618', 200000);
 if (!db) {
@@ -74,9 +74,10 @@ db.transaction(function (tx) {
 
 
         //Админка для входа
-        tx.executeSql("INSERT INTO USERS (first_name, last_name, age, gender, email, login, password) VALUES(?, ?, ?, ?, ?, ?, ?)", ["Никита", "Шипилов", "962481600", "Мужской", "test@mail.ru","admin", "admin"], null, function (tx, error) {
-            console.log(error)
-        });
+        tx.executeSql(
+            "INSERT INTO USERS (first_name, last_name, age, gender, email, login, password) VALUES(?, ?, ?, ?, ?, ?, ?)",
+            ["Никита", "Шипилов", "962481600", "Мужской", "test@mail.ru","admin", "admin"]
+        );
         //Необходимые данные
         tx.executeSql("SELECT COUNT(*) as count FROM `RATES`", [],
             function (tx, result) {
@@ -93,9 +94,6 @@ db.transaction(function (tx) {
                             43, 'Элитный'
                         ]);
                 }
-            },
-            function (tx, error) {
-                console.log(error)
             });
         tx.executeSql("SELECT COUNT(*) as count FROM `ADDITIONALS`", [],
             function (tx, result) {
@@ -114,9 +112,6 @@ db.transaction(function (tx) {
                             50, 'Некурящий водитель'
                         ]);
                 }
-            },
-            function (tx, error) {
-                console.log(error)
             });
 
         //Тестовые данные для демонстрации работоспособности
@@ -132,9 +127,7 @@ db.transaction(function (tx) {
                     , [
                             'Москва, улица 1, 9', 'Москва, улица 100, 1', '1606893563', '1', '1300', '71111111111', '1',
                             'Москва, улица Победы, 20', 'Москва, улица Независимости, 2', '1606893700', '1', '2000', '89999999999','3'
-                        ], null, function (tx, error) {
-                            console.log(error)
-                        });
+                        ]);
                     //Вставляем тестовые соединения с дополнительными параметрами заказов
                     tx.executeSql(
                         "INSERT INTO `ADDITIONAL_ORDERS` (`order_id`, `additional_id`) " +
@@ -142,17 +135,13 @@ db.transaction(function (tx) {
                     , [
                             1, 1,
                             1, 4
-                        ], null, function (tx, error) {
-                            console.log(error)
-                        });
+                        ]);
                 }
-            },
-            function (tx, error) {
-                console.log(error)
             });
     })
 });
 
+//Вставляем тарифы
 function insertRatesMain() {
     db.transaction(function (tx) {
         tx.executeSql(
@@ -165,13 +154,11 @@ function insertRatesMain() {
                 for (let i = 0; i < result.rows.length; i++) {
                     select.append(`<option data-id='${result.rows[i]['id']}' value='${result.rows[i]['price']}'>${result.rows[i]['name']}</option>`)
                 }
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
+//Вставляем дополнительные услуги
 function insertAdditionalsMain() {
     db.transaction(function (tx) {
         tx.executeSql(
@@ -184,13 +171,11 @@ function insertAdditionalsMain() {
                 for (let i = 0; i < result.rows.length; i++) {
                     ul.append(`<li><label><input data-id='${result.rows[i]['id']}' data-price='${result.rows[i]['price']}' type="checkbox" >${result.rows[i]['name']}</label></li>`);
                 }
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
+//Вставляем тарифы в модалку
 function insertRatesModalMain() {
     db.transaction(function (tx) {
         tx.executeSql(
@@ -203,20 +188,20 @@ function insertRatesModalMain() {
                 for (let i = 0; i < result.rows.length; i++) {
                     tableBody.append(`<tr><th scope="row">${result.rows.item(i)['id']}</th><td>${result.rows.item(i)['name']}</td><td>${result.rows.item(i)['price']}</td></tr>`)
                 }
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
+//Вставляем данные в профиль из бд
 function insertProfile() {
+    //Берём данные авторизованного пользователя по id
     db.transaction(function (tx) {
         tx.executeSql(
             'SELECT * FROM `USERS` WHERE id = ?',
             [localStorage.getItem('user')],
             function (tx, result) {
                 if (result.rows.length === 0) return;
+                //Вставляем все данные
                 let user = result.rows.item(0);
                 let date = new Date(user['age']*1000);
                 let month = date.getMonth() + 1;
@@ -228,14 +213,12 @@ function insertProfile() {
                 $('#profileAge').text(day + '.' + month + '.' + date.getFullYear())
                 $('#profileGender').text(user['gender'])
                 $('#profileEmail').text(user['email'])
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
 
+//Заказ такси
 function orderTaxi() {
 
     let from = $('#validationServer01').val();
@@ -255,6 +238,7 @@ function orderTaxi() {
     time = new Date(currentDate.getUTCFullYear() + '-' + (currentDate.getMonth() + 1) + '-' + (currentDate.getDate()) + ' ' + time +':01')
     time = time.valueOf() / 1000
 
+    //Далее идёт использование Yandex API Геокодера (используется, в моём случае, для поиск расстояния между двух точек)
     ymaps.ready(function () {
         var myMap = new ymaps.Map('map', {
             center: [55.75, 37.57],
@@ -267,6 +251,7 @@ function orderTaxi() {
         control.routePanel.options.set({
             types: {auto: true}
         });
+        //Устанавливаем маршрут
         control.routePanel.state.set({
             from: from,
             to: to
@@ -281,25 +266,27 @@ function orderTaxi() {
                 if (activeRoute) {
                     // Получим протяженность маршрута.
                     let length = route.getActiveRoute().properties.get("distance")
+                    //Переволим в км расстояние
                     let distance = length['value'] / 1000;
-
+                    //Считаем сумму заказа
                     let sum = 0;
-                    sum += Math.ceil(distance * rate );
+                    sum += Math.ceil(distance * rate);
                     sum += Object.keys(additional).reduce(function (sum, key) {
                         return +additional[key]['price'] + sum;
                     }, 0)
-                    console.log(sum);
 
                     let modal = $('#exampleModal');
                     let modalBody = modal.find('.modal-body');
                     let confirm = modal.find('#confirmed');
-
+                    //Закидываем ифнормацию о стоимости в модалку
                     modalBody.text('Сумма к оплате: ' + sum + '₽');
+                    //Если пользователь согласен на стоимость, то сохраняем заказ
                     confirm.click(function () {
                        saveOrder(from, to, phone, rateId, time, sum, additional);
                        alert('Заказ создан!');
                        modal.modal('hide');
                     });
+                    //Показываем модалку
                     modal.modal('show')
                 }
             });
@@ -307,15 +294,17 @@ function orderTaxi() {
     });
 }
 
+//Сохранение заказа в базе
 function saveOrder(from, to, phone, rate, time, price, additional) {
     db.transaction( function (tx) {
+        //Сохраняем заказ
         tx.executeSql(
             "INSERT INTO `ORDERS` (`from`, `to`, `time`, `rate`, `price`, `phone`, `user_id`) " +
             "           VALUES (?, ?, ?, ?, ?, ?, ?)"
             , [
                 from, to, time, rate, price, phone, localStorage.getItem('user')
             ]);
-
+        //Сохраняем связи заказа с additional
         tx.executeSql(
             "SELECT max(id) as `order` from `ORDERS` WHERE user_id = ?",
             [localStorage.getItem('user')],
@@ -339,13 +328,14 @@ function saveOrder(from, to, phone, rate, time, price, additional) {
             }
         )
     })
-
 }
 
+//Функция авторизации
 function auth() {
     let login = $('#validationServer01').val();
     let password = $('#validationServer02').val();
 
+    //Если логин и пароль есть в базе, то ставим в локальное хранилище id пользователя и редиректим
     db.transaction( function (tx) {
         tx.executeSql(
             'SELECT id FROM `USERS` WHERE login = ? AND password = ?',
@@ -355,40 +345,46 @@ function auth() {
                 let id = result.rows.item(0).id
                 localStorage.setItem('user', id);
                 redirect();
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
+//Проверяем, авторизован ли пользователь
 function isUserAuth() {
     return localStorage.getItem('user') !== null;
 }
 
+//Функция редиректа
 function redirect() {
     let splitedPathName = document.location.pathname.split('/');
     let currentFile = splitedPathName[splitedPathName.length-1].split('?')[0]
 
+    //Проверка, авторизован ли пользователь
     if (isUserAuth()) {
+        //Если находимся на страницах регистрации или авторизации, то редирект на страницу профиля
         if (['auth.html', 'register.html'].indexOf(currentFile) !== -1) {
             document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/cabinet.html';
         }
     } else {
+        //Если не авторизован и не на страницах авторизации или регистрации, то редирект на авторизацию
         if (['auth.html', 'register.html'].indexOf(currentFile) === -1) {
             document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/auth.html';
         }
     }
 }
+
+//Регистрация пользователя
 function register() {
     let first_name = $('#validationServer01').val();
     let last_name = $('#validationServer02').val();
-    let age = new Date($('#validationServer03').val() ).getTime() / 1000;
+    //Храню информацию о дате рождения в unix, поэтому заморочка с делением
+    let age = new Date($('#validationServer03').val()).getTime() / 1000;
     let gender = $('input:checked').value;
     let email = $('#validationServer05').val();
     let login = $('#validationServer06').val();
     let password = $('#validationServer07').val();
 
+    //Проверяем, существует ли пользователь с таким логином
     db.transaction(function (tx) {
         tx.executeSql(
             'SELECT * FROM `USERS` WHERE login = ?',
@@ -400,8 +396,10 @@ function register() {
                     tx.executeSql("INSERT INTO USERS (first_name, last_name, age, gender, email, login, password) VALUES(?, ?, ?, ?, ?, ?, ?)",
                         [first_name, last_name, age, gender, email, login, password],
                         function (tx, result) {
+                            //Если добавился новый пользователь
                             if (result.rowsAffected === 1) {
                                 alert('Аккаунт успешно создан!');
+                                //Редирект на страницу авторизации
                                 let splitedPathName = document.location.pathname.split('/');
                                 let currentFile = splitedPathName[splitedPathName.length-1].split('?')[0]
                                 document.location.pathname = splitedPathName.slice(0, splitedPathName.length-1).join('/') + '/auth.html';
@@ -410,16 +408,13 @@ function register() {
                             }
                         });
                 }
-            },
-            function (tx, error) {
-                console.log(error);
             });
     })
 }
 
 function insertHistoryCabinet() {
     let modal = $('#exampleModalCenter');
-
+    //Выводим историю заказов (соединяем её с тарифами, чтобы получить их названия)
     db.transaction(function(tx) {
         tx.executeSql(
             'SELECT `ORDERS`.*, `RATES`.name FROM `ORDERS` LEFT JOIN `RATES` ON `RATES`.id = `ORDERS`.rate WHERE user_id = ? ORDER BY `ORDERS`.id DESC',
@@ -428,7 +423,7 @@ function insertHistoryCabinet() {
                 if (result.rows.length === 0) return;
                 let tableBody = modal.find('.modal-body tbody');
                 tableBody.children().remove();
-                console.log(result.rows)
+                //Заполняем таблицу
                 for (let i = 0; i < result.rows.length; i++) {
                     tableBody.append(`
                                 <tr>
@@ -445,12 +440,13 @@ function insertHistoryCabinet() {
     })
 }
 
+//Сохранение партнёра
 function savePartners() {
     let name = $('#validationServer02').val();
     let email = $('#validationServer03').val();
     let phone = $('#validationServer04').val();
     let site = $('#validationServer05').val();
-
+    //Вставляем партнёра
     db.transaction(function(tx) {
         tx.executeSql(
             'INSERT INTO `PARTNERS` (`name`, `email`, `phone`, `site`) VALUES (?, ?, ?, ?)',
