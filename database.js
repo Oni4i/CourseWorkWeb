@@ -1,5 +1,5 @@
 
-redirect();
+//redirect();
 let db = openDatabase('StudentShipilovIE6618', '0.1', 'StudentShipilovIE6618', 200000);
 if (!db) {
     alert('Can\'t connect to db');
