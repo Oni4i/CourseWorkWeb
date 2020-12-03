@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Заказать</title>
+    <script src="https://kit.fontawesome.com/e120607c9f.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
+    <script src="database.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <style>
+        .checkbox-menu li label {
+            display: block;
+            padding: 3px 10px;
+            clear: both;
+            font-weight: normal;
+            line-height: 1.42857143;
+            color: #333;
+            white-space: nowrap;
+            margin:0;
+            transition: background-color .4s ease;
+        }
+        .checkbox-menu li input {
+            margin: 0px 5px;
+            top: 2px;
+            position: relative;
+        }
+
+        .checkbox-menu li.active label {
+            background-color: #cbcbff;
+            font-weight:bold;
+        }
+
+        .checkbox-menu li label:hover,
+        .checkbox-menu li label:focus {
+            background-color: #f5f5f5;
+        }
+
+        .checkbox-menu li.active label:hover,
+        .checkbox-menu li.active label:focus {
+            background-color: #b8b8ff;
+        }
+        .dropdown-toggle::after {
+            margin-left: 15em;
+        }
+        #dropdownMenu1 {
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+        }
+        html {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container-lg">
+    <div class="row">
+        <div class="col-md-12 text-center mt-4">
+            <h1>Заказать такси <i class="fa fa-taxi" aria-hidden="true"></i></h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center mt-4">
+            <ul class="nav nav-tabs justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="cabinet.html">Личный кабинет</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="main.html">Заказать</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="partner.html">Стать партнёром</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about.html">О нас</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="author.html">Автор</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="" onclick="localStorage.clear(); redirect(); return false">Выйти</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <form onsubmit="orderTaxi(); return false">
+            <div class="form-row mt-4">
+                <div class="col-lg-6">
+                    <label for="validationServer01">Откуда</label>
+                    <input type="text" class="form-control" id="validationServer01" required>
+                    <div class="valid-feedback">
+                        Отлично!
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="validationServer02">Куда</label>
+                    <input type="text" class="form-control" id="validationServer02" required>
+                    <div class="valid-feedback">
+                        Отлично!
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-1">
+                <div class="col-lg-12">
+                    <label for="validationServer03">Номер телефона</label>
+                    <input type="tel" class="form-control" id="validationServer03" required>
+                    <div class="valid-feedback">
+                        Отлично!
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-1 align-items-end">
+                <div class="col-lg-9">
+                    <label for="validationServer04">Тариф</label>
+                    <select class="form-control" id="exampleFormControlSelect1" onchange="selectRate(this)">
+                        <option>Пусто</option>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-info btn-block" data-toggle="modal" data-target="#exampleModalCenter">Тарифы</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Тарифы</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Тариф</th>
+                                            <th scope="col">Стоимость за км</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row mt-1 ">
+                <div class="col-lg-4">
+                    <label for="validationServer04">Время заказа</label>
+                    <input type="time" class="form-control" id="validationServer04" required>
+                </div>
+                <div class="col-lg-8">
+                    <label for="dropdownMenu1">Дополнительно</label>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle btn-block" type="button"
+                                id="dropdownMenu1" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="true">
+
+                        </button>
+                        <ul class="dropdown-menu checkbox-menu allow-focus" id="additionals" aria-labelledby="dropdownMenu1">
+                            <li>
+                                <label>
+                                    <input type="checkbox">Пусто
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary mt-2" type="submit" >Заказать</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(".checkbox-menu").on("change", "input[type='checkbox']", function() {
+        $(this).closest("li").toggleClass("active", this.checked);
+    });
+
+    $(document).on('click', '.allow-focus', function (e) {
+        e.stopPropagation();
+    });
+
+    insertRatesMain();
+    insertAdditionalsMain();
+    insertRatesModalMain();
+</script>
+</body>
+</html>

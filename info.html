@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Иформация о заказе</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+	<script src="database.js"></script>
+	<style>
+        label[for=validationServer04] {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-lg">
+    <div class="row">
+        <div class="col-md-12 text-center mt-4">
+            <h1>Иформация о заказе</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center mt-4">
+            <ul class="nav nav-tabs justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="cabinet.html">Личный кабинет</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="main.html">Заказать</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="partner.html">Стать партнёром</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="about.html">О нас</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="author.html">Автор</a>
+                </li>
+				<li class="nav-item">
+					<a class="nav-link" href="" onclick="localStorage.clear(); redirect(); return false">Выйти</a>
+				</li>
+            </ul>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col col-md-6">
+			<table class="table">
+			  <tbody>
+			  <tr>
+				  <td class="text-center" colspan="2">Заказ №1</td>
+				</tr>
+				<tr>
+				  <th scope="row">Имя</th>
+				  <td>Никита</td>
+				</tr>
+				<tr>
+				  <th scope="row">Фамилия</th>
+				  <td>Шипилов</td>
+				</tr>
+				<tr>
+				  <th scope="row">Отчество</th>
+				  <td>Сергеевич</td>
+				</tr>
+				<tr>
+				  <th scope="row">Возраст</th>
+				  <td>20</td>
+				</tr>
+				<tr>
+				  <th scope="row">Пол</th>
+				  <td>Мужской</td>
+				</tr>
+				<tr>
+				  <th scope="row">Номер телефона</th>
+				  <td>+79999276993</td>
+				</tr>
+				<tr>
+				  <th scope="row">Откуда</th>
+				  <td>Подольск, ул. Генерала Стрельбицкого, 21</td>
+				</tr>
+				<tr>
+				  <th scope="row">Куда</th>
+				  <td>Подольск, ул. Юбилейная, 3</td>
+				</tr>
+				<tr>
+				  <th scope="row">Тариф</th>
+				  <td>Эконом</td>
+				</tr>
+				<tr>
+				  <th scope="row">Время подачи</th>
+				  <td>17:00</td>
+				</tr>
+				<tr>
+				  <th scope="row">Дополнительные опции</th>
+				  <td>Кондиционер, некурящий водитель</td>
+				</tr>
+				<tr>
+				  <td class="text-center" colspan="2">300 руб.</td>
+				</tr>
+			  </tbody>
+			</table>
+		</div>
+    </div>
+</div>
+
+</body>
+</html>
