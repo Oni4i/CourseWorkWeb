@@ -379,7 +379,7 @@ function register() {
     let last_name = $('#validationServer02').val();
     //Храню информацию о дате рождения в unix, поэтому заморочка с делением
     let age = new Date($('#validationServer03').val()).getTime() / 1000;
-    let gender = $('input:checked').value;
+    let gender = $('input:checked').val();
     let email = $('#validationServer05').val();
     let login = $('#validationServer06').val();
     let password = $('#validationServer07').val();
